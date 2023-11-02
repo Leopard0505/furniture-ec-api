@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザー（ログイン情報）
+// ユーザーアカウント（個人情報）
+// ユーザー住所
+model User {
+  id           Int           @id @default(autoincrement())
+  email        String?
+  accountId    Int?          @unique
+  account      UserAccount?  @relation(fields: [accountId], references: [id])
+  addresses    UserAddress[]
+  favorites    Favorite[]
+  shoppingCart ShoppingCart?
+  orders       Order[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now())
+}
+
+model UserAccount {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  hash      String   @unique
+  user      User?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model UserAddress {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  user        User     @relation(fields: [userId], references: [id])
+  name        String
+  nameKana    String
+  email       String
+  phoneNo     String
+  zipCode     String
+  prefectures String
+  address     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+}
+
+// 家具
+// 家具カテゴリ
+// ブランドカテゴリ
+// 製造期間
+model FurnitureCategory {
+  label     String                            @unique
+  value     String                            @unique
+  funitures FurnitureCategoriesOnFurnitures[]
+}
+
+model BrandCategory {
+  label      String      @unique
+  value      String      @unique
+  furnitures Furniture[]
+}
+
+model LeadTime {
+  label      String      @unique
+  value      Int         @unique
+  furnitures Furniture[]
+}
+
+model Furniture {
+  id                  Int                               @id @default(autoincrement())
+  name                String                            @unique
+  furnitureCategories FurnitureCategoriesOnFurnitures[]
+  brandCategoryLabel  String
+  brandCategory       BrandCategory                     @relation(fields: [brandCategoryLabel], references: [label])
+  leadTimeLabel       String
+  leadTime            LeadTime                          @relation(fields: [leadTimeLabel], references: [label])
+  items               FurnitureItem[]
+  createdAt           DateTime                          @default(now())
+  updatedAt           DateTime                          @default(now())
+}
+
+model FurnitureCategoriesOnFurnitures {
+  furniture              Furniture         @relation(fields: [furnitureId], references: [id])
+  furnitureId            Int
+  furnitureCategory      FurnitureCategory @relation(fields: [furnitureCategoryLabel], references: [label])
+  furnitureCategoryLabel String
+
+  @@id([furnitureId, furnitureCategoryLabel])
+}
+
+model FurnitureItem {
+  id                   Int                           @id @default(autoincrement())
+  furnitureId          Int
+  furniture            Furniture                     @relation(fields: [furnitureId], references: [id])
+  description          String
+  size                 String
+  color                String
+  weight               String
+  amount               Int
+  image                String
+  createdAt            DateTime                      @default(now())
+  updatedAt            DateTime                      @default(now())
+  favorites            Favorite[]
+  shoppingCart         ShoppingCartOnFurnitureItem[]
+  orderOnFurnitureItem OrderOnFurnitureItem[]
+}
+
+// お気に入り
+model Favorite {
+  userId          Int
+  user            User          @relation(fields: [userId], references: [id])
+  furnitureItemId Int
+  furnitureItem   FurnitureItem @relation(fields: [furnitureItemId], references: [id])
+  assignedAt      DateTime      @default(now())
+
+  @@id([userId, furnitureItemId])
+}
+
+// ショッピングカート
+model ShoppingCart {
+  userId Int                           @unique
+  user   User                          @relation(fields: [userId], references: [id])
+  items  ShoppingCartOnFurnitureItem[]
+}
+
+model ShoppingCartOnFurnitureItem {
+  shoppingCardId  Int
+  shoppingCart    ShoppingCart  @relation(fields: [shoppingCardId], references: [userId])
+  furnitureItemId Int
+  furnitureItem   FurnitureItem @relation(fields: [furnitureItemId], references: [id])
+  quantity        Int
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+
+  @@id([shoppingCardId, furnitureItemId])
+}
+
+// 注文
+// 発送料金
+// 支払い方法
+model ShippingFee {
+  prefectures String @unique
+  amount      Int
+}
+
+model PaymentMethod {
+  label  String @unique
+  amount Int
+}
+
+model OrderOnAddress {
+  orderId     Int    @unique
+  name        String
+  nameKana    String
+  email       String
+  phoneNo     String
+  zipCode     String
+  prefectures String
+  address     String
+  order       Order  @relation(fields: [orderId], references: [id])
+}
+
+model Order {
+  id                  Int                    @id @default(autoincrement())
+  orderUniqueId       String                 @unique
+  userId              Int
+  user                User                   @relation(fields: [userId], references: [id])
+  address             OrderOnAddress?
+  shippingFeeAmount   Int
+  paymentMethodLabel  String
+  paymentMethodAmount Int
+  items               OrderOnFurnitureItem[]
+  leadTimeLabel       String
+  leadTimeValue       Int
+  saleTaxRate         Int
+  totalAmount         Int
+  canceledAt          DateTime?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @default(now())
+}
+
+model OrderOnFurnitureItem {
+  orderId         Int
+  order           Order         @relation(fields: [orderId], references: [id])
+  furnitureItemId Int
+  furnitureItem   FurnitureItem @relation(fields: [furnitureItemId], references: [id])
+  quantity        Int
+
+  @@id([orderId, furnitureItemId])
+}
