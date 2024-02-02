@@ -19,6 +19,7 @@
 $ git clone https://github.com/Leopard0505/furniture-ec-api.git
 $ cd furniture-ec-api
 $ npm install
+$ cp .env.sample .env.development
 ```
 
 ## Running the app
