@@ -20,14 +20,15 @@ export class FurnitureController {
   async popularityFurnitures() {
     return await this.furnitureService.furnitures({
       take: 20,
-      orderBy: {
-        orderOnFurnitureItem: {
-          _count: 'desc',
-        },
-        favorites: {
-          _count: 'desc',
-        },
-      },
+      // DEBUG orderByでエラーになるため、ひとまずコメントアウトしておく。
+      // orderBy: {
+      //   orderOnFurnitureItem: {
+      //     _count: 'desc',
+      //   },
+      //   favorites: {
+      //     _count: 'desc',
+      //   },
+      // },
     });
   }
 

@@ -29,6 +29,13 @@ export class FurnitureService {
       where,
       orderBy,
       include: {
+        furniture: {
+          include: {
+            furnitureCategories: true,
+            brandCategory: true,
+            leadTime: true,
+          },
+        },
         favorites: true,
         orderOnFurnitureItem: true,
         _count: {
