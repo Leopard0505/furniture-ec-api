@@ -11,6 +11,14 @@ export class FurnitureService {
   ) {
     return await this.prismaService.furnitureItem.findUnique({
       where: furnitureItemWhereUniqueInput,
+      include: {
+        furniture: {
+          include: {
+            brandCategory: true,
+          },
+        },
+        favorites: true,
+      },
     });
   }
 
