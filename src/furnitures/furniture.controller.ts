@@ -9,22 +9,6 @@ import { FurnitureService } from './furniture.service';
 export class FurnitureController {
   constructor(private furnitureService: FurnitureService) {}
 
-  @Get(':furnitureId')
-  @ApiOperation({ summary: '家具取得API' })
-  @ApiParam({
-    enum: [1, 2, 3, 4],
-    name: 'furnitureId',
-  })
-  @ApiResponse({
-    status: 201,
-    description: '家具',
-  })
-  async furniture(@Param('furnitureId', ParseIntPipe) furnitureId: number) {
-    return await this.furnitureService.furniture({
-      id: furnitureId,
-    });
-  }
-
   // よく売れる OR お気に入り数が多い
   // 人気
   @Get('/popularity')
@@ -61,6 +45,22 @@ export class FurnitureController {
       orderBy: {
         createdAt: 'desc',
       },
+    });
+  }
+
+  @Get(':furnitureId')
+  @ApiOperation({ summary: '家具取得API' })
+  @ApiParam({
+    enum: [1, 2, 3, 4],
+    name: 'furnitureId',
+  })
+  @ApiResponse({
+    status: 201,
+    description: '家具',
+  })
+  async furniture(@Param('furnitureId', ParseIntPipe) furnitureId: number) {
+    return await this.furnitureService.furniture({
+      id: furnitureId,
     });
   }
 }
